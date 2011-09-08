@@ -1,5 +1,63 @@
 gmc4-as: Simple and non-optimizing assembler for GMC4.
 
+Introduction
+------------
+This assembler is for the R-165 instruction set, as used for the GMC4 4-bit
+microcomputer. This neat little toy was made by Gakken, and can be purchased
+via MakerShed (http://www.makershed.com/ProductDetails.asp?ProductCode=MKGK21).
+
+After the initial joy of puzzling a program together I figured I could use this
+microcomputer to teach myself how to write a basic assembler.
+
+gmc4-as is a naive (but not stupid) approach. It doesn't use a fully fletched
+syntax tree, or a BNF grammer implemented in Yacc (although I wrote a BNF
+grammer to help me handroll a parser). Essentially there are several passes over
+the source code:
+
+  - Strip comments, whitespace and remove empty lines
+  - Four steps of syntax checking
+  - Translating the validated opcodes and operands to instructions
+  - Emit the instructions along with their memory addresses
+
+I haven't done any benchmarking, but since programming the GMC4 easily takes a
+few minutes, I didn't really bother yet optimizing the runtime of the assembler.
+
+Todo
+----
+Apart from some bugs I'm aware of that need fixing, there are various things
+I'd like to implement:
+
+  - Symbolic label support for JUMP.
+  - Better error reporting in case of syntax errors.
+  - Better output and more options for formatting.
+  - Add a Makefile so this can be installed (for the fool who wants that..)
+
+Usage
+-----
+By default the memory addresses are printed in front of the instructions:
+
+  gurthang:gmc4-as {2286} cat example/showkey.s
+  ; Show the key entered on the display
+  KA      ; Read the key
+  TIY E
+  AM
+  TIY F
+  TIA 0
+  AM
+  CAL SUND ; Display the key
+  JUMP 00
+  gurthang:gmc4-as {2287} perl gmc4-as.pl example/showkey.s
+  0x00    0
+  0x02    AE
+  0x03    4
+  0x05    AF
+  0x07    80
+  0x08    4
+  0x09    EB
+  0x0b    F0
+  0x0c    0
+  gurthang:gmc4-as {2288} 
+
 Resources
 ----------
 - Great site with the original CPU manual for the Tandy Microcomputer Trainer,
@@ -8,5 +66,8 @@ Resources
 - Google Knol about the GMC4:
   http://knol.google.com/k/programming-the-gakken-gmc-4-microcomputer
 
+
+Copyright and License
+---------------------
 Written by Jasper Lievisse Adriaanse <jasper@humppa.nl>, released under the
 terms of the liberal ISC license. For the license text please see LICENSE.
