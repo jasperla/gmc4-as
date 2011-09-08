@@ -2,20 +2,20 @@
 
 <mnemonic> ::= <opcode> | <opcode-address> <address> | <opcode-cal> <operand>
 
-<opcode> ::= "KA" | "AO" | "CH" | "CY" | "AM" | "M+" | "M-"
+<opcode> ::= KA | AO | CH | CY | AM | M+ | M-
 
 <opcode-with-arg> ::= <opcode-cal> | <opcode-address>
 
-<opcode-address> ::= "TIA" | "AIA" | "TIY" | "AIY" | "CIA" | "CIY" |
-	"CAL" | "JUMP"
+<opcode-address> ::= TIA | AIA | TIY | AIY | CIA | CIY | CAL | JUMP
 
-<operand> ::= "RSTO" | "SETR" | "RSTR" | "CMPL" | "CHNG" | "SIFT" |
-	"ENDS" | "ERRS" | "SHTS" | "LONS" | "SUND" | "TIMR" |
-	"DSPR" | "DEM-" | "DEM+"
+<operand> ::= RSTO | SETR | RSTR | CMPL | CHNG | SIFT | ENDS | ERRS |
+	SHTS | LONS | SUND | TIMR | DSPR | DEM- | DEM+
 
-<address> ::= "["<digit>"]["<digit>"]"
+<address> ::= <digit><digit> | <address-letter>
 
-<label> ::= <word> ":"
+<address-letter> ::= A | B | C | D | E | F
+
+<label> ::= <word> :
 
 <word> ::= <lowercase letter> | <lowercase letter><word>
 
