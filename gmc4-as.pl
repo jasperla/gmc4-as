@@ -16,8 +16,8 @@
 #
 # Simple, non-optimizing, compiler for gmc4 assembler
 #
-# TODO: - Don't strip empty lines before checking the syntax, this makes
-#         error reporting harder as we don't know the offending line.
+# TODO: - Do not strip empty lines before checking the syntax, this makes
+#         error reporting harder as we do not know the offending line.
 #       - CAL SND: Illegal address: SND
 
 use warnings;
@@ -61,7 +61,7 @@ sub usage
 GMC4-assembler $config{version}
 Jasper Lievisse Adriaanse, 2011
 usage: $0 [-achn] sourcefile
-    -a		: Don't print leading memory addresses
+    -a		: Do not print leading memory addresses
     -c		: Inlucde the original code as comments
     -h		: Show this (help) message
     -n		: Print one nibble per line
@@ -150,9 +150,9 @@ sub check_syntax
 			# Everything that got here is either an address,
 			# or an invalid mnemonic. All the valid two letter
 			# mnemonics have already been recognized (and based on
-			# the composition won't pass as valid addresses, thus
+			# the composition will not pass as valid addresses, thus
 			# anything longer than 2 characters must be address,
-			# or it's invalid.
+			# or it is invalid.
 
 			# Finally check for valid addresses
 			if ($m =~ m/(^(A|B|C|D|E|F)$){1,2}|^([0-8]{1,2})$/){
@@ -172,8 +172,8 @@ sub check_syntax
 		# opcodes from OPCODES_SINGLE do not require an argument.
 		foreach my $m (@line) {
 			# By now we know that all opcodes encountered are valid
-			# so if it's not in OPCODES_SINGLE it's in one of the
-			# others and we know it needs an argument, or it's
+			# so if it is not in OPCODES_SINGLE it is in one of the
+			# others and we know it needs an argument, or it is
 			# an address.
 			next if (defined($OPCODES_SINGLE{$m}));
 
@@ -181,7 +181,7 @@ sub check_syntax
 
 			# check if flag is set, if so, check if $m is
 			# a valid member of %OPERANDS_CAL (minus CAL),
-			# or of it's a valid address. If not, bail out.
+			# or of it is a valid address. If not, bail out.
 			if ($operand_needed) {
 				if (defined($OPCODES_CAL{$m}) or
 				    $m =~ m/(^(A|B|C|D|E|F)$){1,2}|^([0-8]{1,2})$/){
