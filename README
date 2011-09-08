@@ -1,0 +1,12 @@
+gmc4-as: Simple and non-optimizing assembler for GMC4.
+
+Resources
+----------
+- Great site with the original CPU manual for the Tandy Microcomputer Trainer,
+  upon which the GMC4 is based:
+  http://www.polylith.com/~brendan/ClassicComputers/Tandy/uCptrTrainManual1.html
+- Google Knol about the GMC4:
+  http://knol.google.com/k/programming-the-gakken-gmc-4-microcomputer
+
+Written by Jasper Lievisse Adriaanse <jasper@humppa.nl>, released under the
+terms of the liberal ISC license. For the license text please see LICENSE.

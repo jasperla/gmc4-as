@@ -15,6 +15,10 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 # Simple, non-optimizing, compiler for gmc4 assembler
+#
+# TODO: - Don't strip empty lines before checking the syntax, this makes
+#         error reporting harder as we don't know the offending line.
+#       - CAL SND: Illegal address: SND
 
 use warnings;
 use strict;
@@ -30,6 +34,9 @@ my %config = (
 	version 	=> '0.1'
 );
 
+my $sourcefile;
+my @source;	# The actual source on which we operate.
+
 sub parse_args
 {
 	getopts('achn', \%opt);
@@ -44,6 +51,8 @@ sub parse_args
 	$config{includecode} = '1' if defined($opt{c});
 
 	usage() if (defined($opt{h}));
+
+	$sourcefile = $ARGV[0];
 }
 
 sub usage
@@ -60,6 +69,150 @@ EOF
 	exit;
 }
 
+# Read the file into memory and massage it a bit so it can be used
+# for further actions.
+sub reader
+{
+	my ($source) = @_;
+
+	open(FH, '<', $source) or die "Could not open $source for reading.";
+	@source = <FH>;
+	close(FH);
+
+	# First pass: remove comments and remove trailing spaces
+	@source = strip_comments(@source);
+
+	# Second pass: rudimentary syntax validation
+	check_syntax(@source);
+
+	return @source;
+}
+
+# Strip comments and remove empty lines.
+sub strip_comments
+{
+	my (@source) = @_;
+	my @new_source;
+
+	foreach my $line (@source) {
+		# Remove comments
+		$line =~ s/\;.*//g;
+		# Remove leading whitespace...
+		$line =~ s/^\s+//;
+		# ...remove trailing whitespace
+		$line =~ s/\s+$//;
+		if (!($line =~ /^$/)){
+			push(@new_source, $line);
+		}
+	}
+
+	return @new_source;
+}
+
+sub check_syntax
+{
+	my (@source) = @_;
+	my ($err_msg,$mnemonic, $operand_needed, $prev_mnemonic);
+
+	foreach my $line (@source) {
+		my @line = split(/ /, $line);
+		# No more than two instructions per line
+		if (@line > 2) {
+			$err_msg = sprintf("Line too long: %s", $line);
+			goto err;
+		}
+
+		# Check for illegal instructions, skip to the end if we
+		# found a mnemonic.
+		foreach my $m (@line) {
+			my $mnemonic_valid = '0';
+
+			chomp($m);
+
+			# First check the normal opcodes
+			if (defined($OPCODES_SINGLE{$m})) {
+				$mnemonic_valid = '1' 
+			}
+			next if ($mnemonic_valid);
+
+			# Then check for opcodes which need a memory operand
+			if (defined($OPCODES_MEM{$m})) {
+				$mnemonic_valid = '1';
+			}
+			next if ($mnemonic_valid);
+
+			# Check for valid CAL operands
+			if (defined($OPCODES_CAL{$m})) {
+				$mnemonic_valid = '1';
+			}
+			next if ($mnemonic_valid);
+
+			# Everything that got here is either an address,
+			# or an invalid mnemonic. All the valid two letter
+			# mnemonics have already been recognized (and based on
+			# the composition won't pass as valid addresses, thus
+			# anything longer than 2 characters must be address,
+			# or it's invalid.
+
+			# Finally check for valid addresses
+			if ($m =~ m/(^(A|B|C|D|E|F)$){1,2}|^([0-8]{1,2})$/){
+				$mnemonic_valid = '1';
+			} else {
+				$err_msg = sprintf("Illegal address: %s", $m);
+				goto err;			
+			}
+
+			if ($mnemonic_valid < 1){
+				$err_msg = sprintf("Illegal mnemonic: %s", $m);
+				goto err;
+			}
+		}
+
+		# Certain opcodes require an argument, or rather, only
+		# opcodes from OPCODES_SINGLE do not require an argument.
+		foreach my $m (@line) {
+			# By now we know that all opcodes encountered are valid
+			# so if it's not in OPCODES_SINGLE it's in one of the
+			# others and we know it needs an argument, or it's
+			# an address.
+			next if (defined($OPCODES_SINGLE{$m}));
+
+			my $valid_operand = '0';
+
+			# check if flag is set, if so, check if $m is
+			# a valid member of %OPERANDS_CAL (minus CAL),
+			# or of it's a valid address. If not, bail out.
+			if ($operand_needed) {
+				if (defined($OPCODES_CAL{$m}) or
+				    $m =~ m/(^(A|B|C|D|E|F)$){1,2}|^([0-8]{1,2})$/){
+					;
+				} else {
+					$err_msg = sprintf("Missing operand for: %s",
+					    $prev_mnemonic);
+					goto err;
+				}
+
+				# Now clear the flag and continue.
+				$operand_needed = '0';
+			} else {
+				$operand_needed = '1';
+			}
+
+			# Save the previous mnemonic in case there is no operand
+			# so we can prepare a better error message.
+			$prev_mnemonic = $m;
+		}
+	}
+
+	return;
+
+err:
+	print($err_msg . "\n");
+	exit 1;
+}
+
+# Depending on options passed to the script, format and emit the
+# instructions.
 sub emitter
 {
 	my ($address, $instruction) = @_;
@@ -72,3 +225,6 @@ sub emitter
 }
 
 parse_args();
+
+@source = reader($sourcefile);
+

@@ -20,13 +20,13 @@ package GMC4::Opcodes;
 our @ISA = qw(Exporter);
 
 our @EXPORT = qw(
-	%OPCODES
+	%OPCODES_SINGLE
 	%OPCODES_MEM
 	%OPCODES_CAL
 );
 
 # Lookup table for matching mnemonics to instructions
-our %OPCODES = (
+our %OPCODES_SINGLE = (
 	'KA' => '0',
 	'AO' => '1',
 	'CH' => '2',
@@ -49,8 +49,10 @@ our %OPCODES_MEM = (
 	'JUMP' => 'F',
 );
 
-# Operands in this table are used with CAL
+# Operands in this table are used with CAL, we add CAL itself here too
+# so it can also be checked for valid spelling (not CALL!)
 our %OPCODES_CAL = (
+	'CAL'  => 'E',
 	'RSTO' => 'E0',
 	'SETR' => 'E1',
 	'RSTR' => 'E2',
