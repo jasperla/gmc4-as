@@ -17,9 +17,12 @@
 # Simple, non-optimizing, compiler for gmc4 assembler
 #
 # TODO: - Do not strip empty lines before checking the syntax, this makes
-#         error reporting harder as we do not know the offending line.
-#       - CAL SND: Illegal address: SND
-#       - Fix pretty printing of F0\n0 when we meant F00
+#	  error reporting harder as we do not know the offending line.
+#	- CAL SND: Illegal address: SND
+#	- Fix pretty printing of F0\n0 when we meant F00
+#	- Add support for symbolic labels.
+#	- Add headers to the output saying what the columns are
+#	  if not already obvious.
 
 use warnings;
 use strict;
@@ -283,7 +286,7 @@ sub emitter
 				$line = $instruction;
 			}
 
-			printf("%02x\t%s\n", $address, $line);
+			printf("0x%02x\t%s\n", $address, $line);
 		}
 	} else {
 		foreach my $instruction (@instructions) {
