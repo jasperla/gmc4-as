@@ -177,9 +177,7 @@ sub check_syntax
 			# an address.
 			next if (defined($OPCODES_SINGLE{$m}));
 
-			my $valid_operand = '0';
-
-			# check if flag is set, if so, check if $m is
+			# Check if flag is set, if so, check if $m is
 			# a valid member of %OPERANDS_CAL (minus CAL),
 			# or of it is a valid address. If not, bail out.
 			if ($operand_needed) {
