@@ -19,6 +19,7 @@
 # TODO: - Do not strip empty lines before checking the syntax, this makes
 #         error reporting harder as we do not know the offending line.
 #       - CAL SND: Illegal address: SND
+#       - Fix pretty printing of F0\n0 when we meant F00
 
 use warnings;
 use strict;
@@ -251,13 +252,60 @@ sub translator
 # instructions.
 sub emitter
 {
-	#my (@source) = @_;
-	my ($address, $instruction) = @_;
+	my (@instructions) = @_;
 
 	if (!$config{noaddress}){
-		printf("%02x = %s\n", $address, $instruction);
+		my $address = undef;
+		my $line = "";
+		my $arg_needed = '0';
+		my $saved_instruction;
+
+		foreach my $instruction (@instructions) {
+			$line = "";
+			if ($arg_needed) {
+				$arg_needed = '0';
+				$address += 2;
+				$line = $saved_instruction . $instruction;
+			} elsif (instruction_needs_arg($instruction)) {
+			# If an argument is needed, set the flag, save the
+			# instruction and process the next instruction.
+				$arg_needed = '1';
+				$saved_instruction = $instruction;
+				next;
+			} else {
+				# Just increment the address and print the
+				# instruction.
+				if (!defined($address)) {
+					$address = '0';
+				} else {
+					$address += 1;
+				}
+				$line = $instruction;
+			}
+
+			printf("%02x\t%s\n", $address, $line);
+		}
 	} else {
-		printf("%s\n", $instruction);
+		foreach my $instruction (@instructions) {
+			printf("%s\n", $instruction);
+		}
+	}
+}
+
+# Return true if an instruction needs an argument. This makes the emitter()
+# a lot easier to write.
+sub instruction_needs_arg
+{
+	my $instruction = shift;
+
+	# We only need to look at %rOPCODES_MEM or for something that
+	# translates to 'CAL'. XXX: This hardcodes CAL/E..
+	my %rOPCODES_MEM = reverse %OPCODES_MEM;
+
+	if (defined($rOPCODES_MEM{$instruction}) or $instruction eq 'E') {
+		return 1;
+	} else {
+		return 0;
 	}
 }
 
@@ -265,4 +313,6 @@ parse_args();
 
 @source = reader($sourcefile);
 
-translator(@source);
+@instructions = translator(@source);
+
+emitter(@instructions);
