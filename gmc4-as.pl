@@ -35,7 +35,8 @@ my %config = (
 );
 
 my $sourcefile;
-my @source;	# The actual source on which we operate.
+my @source;		# The actual source (in memory) on which we operate.
+my @instructions;	# The translated instructions, ready for the emitter.
 
 sub parse_args
 {
@@ -209,10 +210,48 @@ err:
 	exit 1;
 }
 
+# We know that the code that got this far is good enough to be translated
+# to machine instructions.
+sub translator
+{
+	my (@source) = @_;
+	# We build a new array based on @source, so we can later pass this
+	# to emitter() in one go. Instead of calling emmitter() for every
+	# translated line.
+	my @instructions;
+
+	foreach my $line (@source) {
+		my @line = split(/ /, $line);
+		foreach my $m (@line) {
+			if (defined($OPCODES_SINGLE{$m})) {
+				push(@instructions, $OPCODES_SINGLE{$m});
+			} elsif (defined($OPCODES_MEM{$m})) {
+				push(@instructions, $OPCODES_MEM{$m});
+			} elsif (defined($OPCODES_CAL{$m})) {
+				# We have CAL in %OPCODES_CAL, but we don't want
+				# to emit 'E', so skip that, so silently eat it.
+				if ($m ne "CAL") {
+					push(@instructions, $OPCODES_CAL{$m});
+				}
+			} else {
+				# It's just an address, so split it and add them
+				# individually.
+				my @address = split(//, $m);
+				foreach (@address) {
+					push(@instructions, $_);
+				}
+			}
+		} 
+	}
+
+	return @instructions;
+}
+
 # Depending on options passed to the script, format and emit the
 # instructions.
 sub emitter
 {
+	#my (@source) = @_;
 	my ($address, $instruction) = @_;
 
 	if (!$config{noaddress}){
@@ -226,3 +265,4 @@ parse_args();
 
 @source = reader($sourcefile);
 
+translator(@source);

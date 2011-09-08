@@ -11,7 +11,7 @@
 <operand> ::= RSTO | SETR | RSTR | CMPL | CHNG | SIFT | ENDS | ERRS |
 	SHTS | LONS | SUND | TIMR | DSPR | DEM- | DEM+
 
-<address> ::= <digit><digit> | <address-letter>
+<address> ::= <digit> | <digit><digit> | <address-letter>
 
 <address-letter> ::= A | B | C | D | E | F
 
