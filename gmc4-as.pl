@@ -15,14 +15,6 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 # Simple, non-optimizing, compiler for gmc4 assembler
-#
-# TODO: - Do not strip empty lines before checking the syntax, this makes
-#	  error reporting harder as we do not know the offending line.
-#	- CAL SND: Illegal address: SND
-#	- Fix pretty printing of F0\n0 when we meant F00
-#	- Add support for symbolic labels.
-#	- Add headers to the output saying what the columns are
-#	  if not already obvious.
 
 use warnings;
 use strict;
@@ -135,21 +127,15 @@ sub check_syntax
 			chomp($m);
 
 			# First check the normal opcodes
-			if (defined($OPCODES_SINGLE{$m})) {
-				$mnemonic_valid = '1' 
-			}
+			$mnemonic_valid = '1' if (defined($OPCODES_SINGLE{$m}));
 			next if ($mnemonic_valid);
 
 			# Then check for opcodes which need a memory operand
-			if (defined($OPCODES_MEM{$m})) {
-				$mnemonic_valid = '1';
-			}
+			$mnemonic_valid = '1' if (defined($OPCODES_MEM{$m}));
 			next if ($mnemonic_valid);
 
 			# Check for valid CAL operands
-			if (defined($OPCODES_CAL{$m})) {
-				$mnemonic_valid = '1';
-			}
+			$mnemonic_valid = '1' if (defined($OPCODES_CAL{$m}));
 			next if ($mnemonic_valid);
 
 			# Everything that got here is either an address,
@@ -164,7 +150,7 @@ sub check_syntax
 				$mnemonic_valid = '1';
 			} else {
 				$err_msg = sprintf("Illegal address: %s", $m);
-				goto err;			
+				goto err;
 			}
 
 			if ($mnemonic_valid < 1){
@@ -245,7 +231,7 @@ sub translator
 					push(@instructions, $_);
 				}
 			}
-		} 
+		}
 	}
 
 	return @instructions;
