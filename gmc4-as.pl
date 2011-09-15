@@ -18,19 +18,22 @@
 
 use warnings;
 use strict;
-use lib;
+use lib 'lib/';
 use Getopt::Std;
 use GMC4::Opcodes;
+use vars qw($VERSION);
+
+$VERSION = '0.1';
 
 my %opt;
 my %config = (
-    no_address 	=> '0',
-    per_nibble 	=> '0',
-    include_code	=> '0',
-    version 	=> '0.1',
-    author => 'Jasper Lievisse Adriaanse',
-    contact => 'jasper@humppa.nl',
-    year => '2011'
+    no_address 	 => '0',
+    per_nibble 	 => '0',
+    include_code => '0',
+    version 	 => $VERSION,
+    author       => 'Jasper Lievisse Adriaanse',
+    contact      => 'jasper@humppa.nl',
+    year         => '2011'
 );
 
 my $sourcefile;
