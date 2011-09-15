@@ -24,10 +24,13 @@ use GMC4::Opcodes;
 
 my %opt;
 my %config = (
-	noaddress 	=> '0',
-	pernibble 	=> '0',
-	includecode	=> '0',
-	version 	=> '0.1'
+    no_address 	=> '0',
+    per_nibble 	=> '0',
+    include_code	=> '0',
+    version 	=> '0.1',
+    author => 'Jasper Lievisse Adriaanse',
+    contact => 'jasper@humppa.nl',
+    year => '2011'
 );
 
 my $sourcefile;
@@ -39,15 +42,15 @@ sub parse_args
 	getopts('achn', \%opt);
 
 	# Do not print the leading addresses in the the ouput
-	$config{noaddress} = '1' if defined($opt{a});
+	$config{no_address} = '1' if defined($opt{a});
 
 	# Print the output one nibble per line, CALL\nSND\netc
-	$config{pernibble} = '1' if defined($opt{n});
+	$config{per_nibble} = '1' if defined($opt{n});
 
 	# Inlucde the original code as comments
-	$config{includecode} = '1' if defined($opt{c});
+	$config{include_code} = '1' if defined($opt{c});
 
-	usage() if (defined($opt{h}));
+	usage() if (defined($opt{h}) or !defined($ARGV[0]));
 
 	$sourcefile = $ARGV[0];
 }
@@ -56,7 +59,7 @@ sub usage
 {
 	print STDERR << "EOF";
 GMC4-assembler $config{version}
-Jasper Lievisse Adriaanse, 2011
+$config{author} <$config{contact}>, $config{year}
 usage: $0 [-achn] sourcefile
     -a		: Do not print leading memory addresses
     -c		: Inlucde the original code as comments
@@ -243,7 +246,7 @@ sub emitter
 {
 	my (@instructions) = @_;
 
-	if (!$config{noaddress}){
+	if (!$config{no_address}){
 		my $address = undef;
 		my $line = "";
 		my $arg_needed = '0';
