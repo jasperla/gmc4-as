@@ -132,10 +132,36 @@ sub check_syntax
 
 		# Check for illegal instructions, skip to the end if we
 		# found a mnemonic.
+		my $jmp_label;
+		my $jmp_flag = '0';
 		foreach my $m (@line) {
 			my $mnemonic_valid = '0';
+			$jmp_label = '0';
 
 			chomp($m);
+
+			# Check for JUMP insruction with valid label before
+			# anything else.
+			if ($m eq "JUMP"){
+				# Set a flag, so we treat the next $m differently.
+				$jmp_flag = '1';
+				next;
+			}
+
+			if ($jmp_flag){
+				$jmp_flag = '0';
+
+				# Do some basic checks on this JUMP label which can
+				# either be a valid address or symbolic label.
+				if ($m =~ m/(^(\w*)$)|^([0-8]{1,2})$/){
+					print "valid label: $m\n";
+					$jmp_label = '1';
+					next;
+				} else {
+					$err_msg = sprintf("Illegal JUMP label: %s", $m);
+					goto err;
+				}
+			}
 
 			# First check the normal opcodes
 			$mnemonic_valid = '1' if (defined($OPCODES_SINGLE{$m}));
@@ -178,6 +204,26 @@ sub check_syntax
 			# others and we know it needs an argument, or it is
 			# an address.
 			next if (defined($OPCODES_SINGLE{$m}));
+
+			# If $m is a JMP instruction, the argument may either be
+			# a valid address or a symbolic label (alphanummeric chars only).
+			if ($m eq "JUMP") {
+				$jmp_flag = '1';
+				next;
+			}
+
+			# Now validate the argument to JMP.
+			if ($jmp_flag) {
+				if ($m =~ m/(^(\w*)$)|^([0-8]{1,2})$/){
+					;
+				} else {
+					$err_msg = sprintf("Invalid JUMP label");
+					goto err;
+				}
+
+				$jmp_flag = '0';
+				next;
+			}
 
 			# Check if flag is set, if so, check if $m is
 			# a valid member of %OPERANDS_CAL (minus CAL),
@@ -269,8 +315,8 @@ sub emitter
 				$address += 2;
 				$line = $saved_instruction . $instruction;
 			} elsif (instruction_needs_arg($instruction)) {
-			# If an argument is needed, set the flag, save the
-			# instruction and process the next instruction.
+				# If an argument is needed, set the flag, save the
+				# instruction and process the next instruction.
 				$arg_needed = '1';
 				$saved_instruction = $instruction;
 				next;

@@ -1,6 +1,8 @@
 - Do not strip empty lines before checking the syntax, this makes
   error reporting harder as we do not know the offending line.
 - CAL SND: Illegal address: SND
-- Fix pretty printing of F0\n0 when we meant F00
+- Fix pretty printing of F0\n0 when we meant F00 and it's the last instruction.
+  This means just jump back to the beginning. Otherwise, '0' may actually be
+  the instruction code for KA.
 - Add support for symbolic labels.
 - Include the original source as comment in the output
