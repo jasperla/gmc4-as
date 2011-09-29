@@ -1,6 +1,8 @@
 use 5.008;
 use ExtUtils::MakeMaker;
 
+my @prog = ('gmc4-as.pl');
+
 WriteMakefile(
     NAME => 'gmc4-as',
     VERSION_FROM => 'gmc4-as.pl',
@@ -14,8 +16,5 @@ WriteMakefile(
     },
     AUTHOR => 'Jasper Lievisse Adriaanse <jasper@humppa.nl>',
     ABSTRACT => 'Simple non-optimizing assembler for GMC-4',
-    PL_FILES =>
-    {
-	'gmc4-as.pl'
-    },
+    EXE_FILES => [ map "$_", @prog ],
 );
