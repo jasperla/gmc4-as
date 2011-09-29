@@ -5,4 +5,3 @@
 - Add support for symbolic labels.
 - Add headers to the output saying what the columns are if not already
   obvious.
-- Add option to only validate the code, but don't compile it.

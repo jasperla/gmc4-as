@@ -30,6 +30,7 @@ my %config = (
     no_address 	 => '0',
     per_nibble 	 => '0',
     include_code => '0',
+    dry_run      => '0',
     version 	 => $VERSION,
     author       => 'Jasper Lievisse Adriaanse',
     contact      => 'jasper@humppa.nl',
@@ -42,7 +43,7 @@ my @instructions;	# The translated instructions, ready for the emitter.
 
 sub parse_args
 {
-	getopts('achn', \%opt);
+	getopts('achln', \%opt);
 
 	# Do not print the leading addresses in the the ouput
 	$config{no_address} = '1' if defined($opt{a});
@@ -52,6 +53,9 @@ sub parse_args
 
 	# Inlucde the original code as comments
 	$config{include_code} = '1' if defined($opt{c});
+
+	# Don't try to emit the instructions, just validate the input
+	$config{dry_run} = '1' if defined($opt{n});
 
 	usage() if (defined($opt{h}) or !defined($ARGV[0]));
 
@@ -67,7 +71,7 @@ usage: $0 [-achn] sourcefile
     -a		: Do not print leading memory addresses
     -c		: Inlucde the original code as comments
     -h		: Show this (help) message
-    -n		: Print one nibble per line
+    -l		: Print one nibble per line
 EOF
 	exit;
 }
@@ -307,6 +311,11 @@ sub instruction_needs_arg
 parse_args();
 
 @source = reader($sourcefile);
+
+# If we did all we had to, just exit.
+if (@source && $config{dry_run}){
+	exit 0;
+}
 
 @instructions = translator(@source);
 
