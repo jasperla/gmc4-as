@@ -72,6 +72,7 @@ usage: $0 [-achn] sourcefile
     -c		: Inlucde the original code as comments
     -h		: Show this (help) message
     -l		: Print one nibble per line
+    -n		: Don't compile, just check the syntax.
 EOF
 	exit;
 }
