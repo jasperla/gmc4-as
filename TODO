@@ -3,5 +3,4 @@
 - CAL SND: Illegal address: SND
 - Fix pretty printing of F0\n0 when we meant F00
 - Add support for symbolic labels.
-- Add headers to the output saying what the columns are if not already
-  obvious.
+- Include the original source as comment in the output

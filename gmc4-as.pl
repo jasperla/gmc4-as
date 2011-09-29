@@ -259,6 +259,8 @@ sub emitter
 		my $arg_needed = '0';
 		my $saved_instruction;
 
+		printf("Address  Instruction\n" . "-" x 20 . "\n");
+
 		foreach my $instruction (@instructions) {
 			$line = "";
 			if ($arg_needed) {
@@ -282,9 +284,10 @@ sub emitter
 				$line = $instruction;
 			}
 
-			printf("0x%02x\t%s\n", $address, $line);
+			printf("0x%0x\t %s\n", $address, $line);
 		}
 	} else {
+		printf("Instructions:\n" . "-" x 20 . "\n");
 		foreach my $instruction (@instructions) {
 			printf("%s\n", $instruction);
 		}
